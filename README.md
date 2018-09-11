@@ -1,6 +1,13 @@
 # CMPUT399Lab1
 Lab 1 working with differential drive motor robotics using the EV3 lego kit.
 
+Using **WinSCP** to transfer file into the appropriate folder on the robot.
+
+1. Use `vi filname.file`
+2. Enter `:set ff=unix` press Enter
+3. Exit file `:wq`
+4. Then run file from ev3 ssh CLI `./filename.file`
+
 ## Step 4
 * Straight line (20cm)
 * Rectangle
