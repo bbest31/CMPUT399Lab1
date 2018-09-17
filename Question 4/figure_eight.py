@@ -9,13 +9,23 @@ from ev3dev.ev3 import *
 motorLeft = LargeMotor(OUTPUT_B)
 motorRight = LargeMotor(OUTPUT_C)
 
-def leftCircle():
-    motorLeft.run_to_rel_pos(position_sp=1569, speed_sp=180, stop_action="hold")
-    motorLeft.wait_while('running')
+# Connect gyro
+gy = GyroSensor() 
 
-def rightCircle():
-    motorRight.run_to_rel_pos(position_sp=1569, speed_sp=180, stop_action="hold")
-    motorRight.wait_while('running')
+# Put the gyro sensor into ANGLE mode.
+gy.mode='GYRO-ANG'
+
+def firstCircle():
+    startAngle = gy.value()
+    while(gy.value() != startAngle + 360):
+        motorLeft.run_forever(speed_sp=180)
+    motorLeft.stop()
+
+def secondCircle():
+    startAngle = gy.value()
+    while(gy.value() != startAngle + 360):
+        motorRight.run_forever(speed_sp=180)
+    motorRight.stop()
 
 assert motorRight.connected
 assert motorLeft.connected
@@ -25,8 +35,8 @@ Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
 # Run
-leftCircle()
-rightCircle()
+firstCircle()
+secondCircle()
 
 
 
