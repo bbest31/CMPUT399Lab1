@@ -13,7 +13,9 @@ gy = GyroSensor()
 gy.mode='GYRO-ANG'
 
 motorLeft = LargeMotor(OUTPUT_B)
+motorRight = LargeMotor(OUTPUT_C)
 
+assert motorRight.connected
 assert motorLeft.connected
 
 Leds.set_color(Leds.LEFT,  Leds.RED)
@@ -22,7 +24,9 @@ sleep(0.5)
 startAngle = gy.value()
 while(gy.value() != startAngle + 360):
     motorLeft.run_forever(speed_sp=180)
+    motorRight.run_forever(speed_sp=45)
 motorLeft.stop()
+motorRight.stop()
 
 
 

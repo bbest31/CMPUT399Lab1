@@ -19,7 +19,9 @@ def turnLeft():
     startAngle = gy.value()
     while(gy.value() != startAngle+90):
         motorLeft.run_forever(speed_sp=180)
+        motorRight.run_forever(speed_sp=-180)
     motorLeft.stop()
+    motorRight.stop()
     sleep(1)
     angle = gy.value()
     print('Angle in relation to original = '+str(angle))
