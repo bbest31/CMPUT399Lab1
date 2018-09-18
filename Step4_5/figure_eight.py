@@ -17,7 +17,7 @@ gy.mode='GYRO-ANG'
 
 def rightCircle():
     startAngle = gy.value()
-    while(gy.value() != startAngle + 315):
+    while(gy.value() <= startAngle + 315):
         motorLeft.run_forever(speed_sp=180)
         motorRight.run_forever(speed_sp=45)
     motorLeft.stop()

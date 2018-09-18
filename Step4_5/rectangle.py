@@ -17,7 +17,7 @@ units = gy.units
 
 def turnLeft():
     startAngle = gy.value()
-    while(gy.value() != startAngle+90):
+    while(gy.value() <= startAngle+90):
         motorLeft.run_forever(speed_sp=180)
         motorRight.run_forever(speed_sp=-180)
     motorLeft.stop()
