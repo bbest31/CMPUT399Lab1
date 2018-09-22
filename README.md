@@ -37,12 +37,13 @@ How does error accumulate in rotation and linear movements of your robot, as fun
 
 Your robot is "probably" not perfect. There are small errors in moves. For the straight line movement, the easiest way to see this could be to measure the actual distance travelled by the robot and compare it to the computed distance.
 
-Design two ways of measuring the error when your robot is moving in straight line. At least one of them must use input from some sensors. Compare the two methods. What do you find?
+Design two ways of measuring the error when your robot is moving in straight line. At least one of them must use input from some sensors. Compare the two methods. What do you find? Add your answers to the report. 
+
 Design two ways of measuring the error when the robot is rotating. At least one of them must use input from some sensors. Compare the two methods. What do you find? Add your answers to the report.
 
 ## Step 8
 Convert your differential drive vehicle into a Braitenberg vehicle:
-Using light detecting sensors, implement in your robot the following behaviours against a light source: Coward, Aggresive, Love and Explore. 
+Using light detecting sensors, implement in your robot the following behaviours against a light source: Coward = away from light, Aggresive = toward light source, Love = toward inhibitory and stops in front and Explore = . 
 
 ## What to hand in:
 A ZIP file and a report file (.pdf) electronically on the course homepage. The ZIP file has to contain your implementations and any data you either measured or generated. The implementation have to be well documented. In the ZIP file use a proper directory arrangement and write a readme.txt file about its structure.
