@@ -9,8 +9,8 @@ import threading
 #---------------------------------
 #Global constants for this file.
 
-#In miliseconds 
-timeDelta = 500/1000
+#In seconds 
+timeDelta = 0.5
 #In meters
 wheelDiameter=5.5/100
 #In meters
@@ -55,7 +55,7 @@ def wheelVelocity(currentTachoReading, previousTachoReading):
 #currentTachoReadingLeft: int. Degrees of rotation  per second for right wheel in the current measurement.
 #previousTachoReadingLeft: int. Degrees of rotation per second of right wheel  in the previous measurement.
 #returns: float. Angular speed velocity of vehicle, in radians/sec
-def angularVelociy(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight):
+def angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight):
     return (wheelVelocity(currentTachoReadingRight, previousTachoReadingRight) - wheelVelocity(currentTachoReadingLeft, previousTachoReadingLeft))/vehicleWidth
 
 
@@ -65,8 +65,6 @@ def angularVelociy(currentTachoReadingLeft, previousTachoReadingLeft, currentTac
 #previousTachoReadingLeft: int. Degrees of rotation per second of right wheel  in the previous measurement.
 #returns: float. Speed of the vehicle, essentially, an average for the speeds of the two wheels. in m/s
 def vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight):
-    print("RIGHT VEL" + str(wheelVelocity(currentTachoReadingRight, previousTachoReadingRight)))
-    print("LEFT VEL" + str(wheelVelocity(currentTachoReadingLeft, previousTachoReadingLeft)))
     return (wheelVelocity(currentTachoReadingRight, previousTachoReadingRight) + wheelVelocity(currentTachoReadingLeft, previousTachoReadingLeft))/2
 
 
@@ -80,21 +78,56 @@ def vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTa
 def radiusOfRotation(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight):
     return vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight)/angularVelociy(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight)
     
+#angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
+#returns: float. angle of rotation in radians
+def theta(angularVelocityTimeSeries):
+    #This is an approximation of an integral by using a Riemann sum
+    theta = 0
+    for measurement in angularVelocityTimeSeries:
+        theta = theta + measurement
+    return theta*timeDelta
 
+#angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
+#velocityTimeSeries: list<float>. Contains the discrete measurements for the linear velocity from 0 to (len(velocityTimeSeries)-1)*deltaTime seconds
+#returns: float. the x coordinate measured from the point of origin. In meters.
+def positionX(velocityTimeSeries, angularVelocityTimeSeries):
+    #This is an approximation of an integral by using a Riemann sum
+    x = 0
+    for velocityMeasurement in velocityTimeSeries:
+        x = x + velocityMeasurement
+    x = x * cos(theta(angularVelocityTimeSeries))
+    return x*timeDelta
+
+#angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
+#velocityTimeSeries: list<float>. Contains the discrete measurements for the linear velocity from 0 to (len(velocityTimeSeries)-1)*deltaTime seconds
+#returns: float. the x coordinate measured from the point of origin. In meters.
+def positionY(velocityTimeSeries, angularVelocityTimeSeries):
+    #This is an approximation of an integral by using a Riemann sum
+    x = 0
+    for velocityMeasurement in velocityTimeSeries:
+        x = x + velocityMeasurement
+    x = x * sin(theta(angularVelocityTimeSeries))
+    return x*timeDelta
 
 def measure():
     previousTachoReadingLeft = motorLeft.position
     previousTachoReadingRight = motorRight.position
+    #Store every single measurement of the angular velocity
+    wTimeSeries = []
+    #Store every single measurement of the velocity
+    vTimeseries = []
+    #If we wanted to figure out at how many seconds a particular measurement vTimeseries[i] was taken, we just have to multiply:  i*timeDelta
     while True:
         #Gather measurements every timeDelta seconds
         sleep(timeDelta)
         currentTachoReadingLeft = motorLeft.position
         currentTachoReadingRight = motorRight.position
-        #screen_lock.acquire()
-        print("LEFT PREV TACHO: " + str(previousTachoReadingLeft) + " CURRENT TACHO: " + str(currentTachoReadingLeft))
-        print(str(angularVelociy(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight)))
-        print("RADIUS OF ROTATION: " + str(radiusOfRotation(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight)))
-        #screen_lock.release()
+        wTimeSeries.append(angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight))
+        vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft, currentTachoReadingRight, previousTachoReadingRight))
+        print("--------------------------------")
+        print("Theta(t): " + str(theta(wTimeSeries)))
+        print("PosX(t): " + str(positionX(vTimeseries, wTimeSeries)))
+        print("PosY(t): " + str(positionY(vTimeseries, wTimeSeries)))
         #After all measurements are taken: 
         previousTachoReadingLeft = currentTachoReadingLeft
         previousTachoReadingRight = currentTachoReadingRight
@@ -110,7 +143,7 @@ sleep(0.5)
 
 # commands correspond to [left-motor-speed, right-motor-speed, time duration (s)]
 # commands = [[80,60,2],[60,60,1],[-50,80,2]]
-commands = [[50,50,10]]
+commands = [[20,40,4]]
 
 #Start measurement thread. This is a daemon thread which will terminate once 
 #The main program terminates.
@@ -119,6 +152,9 @@ measuringThread.start()
 
 
 # Run the commands given in the variable
+#TODO instead of multithreading we could also consider refreshing this loop
+#     every timeDelta seconds, and then figuring out when enough seconds have passed
+#     so that we can move to the next instruction.
 for command in commands:
     runTime = command[2]*1000
     leftSpeed = (command[0]*0.01)*900
