@@ -8,13 +8,13 @@ motorRight = LargeMotor(OUTPUT_C)
 motorLeft = LargeMotor(OUTPUT_B)
 
 # Connect Color Sensors
-lightSensor1 = ColorSensor(INPUT_4)
-lightSensor2 = ColorSensor(INPUT_2)
+rightSensor = ColorSensor(INPUT_4)
+leftSensor = ColorSensor(INPUT_2)
 
 
 # Put the color sensors into AMBIENT mode.
-lightSensor2.mode = 'COL-AMBIENT'
-lightSensor1.mode = 'COL-AMBIENT'
+leftSensor.mode = 'COL-AMBIENT'
+rightSensor.mode = 'COL-AMBIENT'
 
 assert motorRight.connected
 assert motorLeft.connected
@@ -31,8 +31,8 @@ def fear(thresh):
     motorRight.run_forever(speed_sp=280)
 
     while(True):
-        if(lightSensor1.ambient_light_intensity > thresh or lightSensor2.ambient_light_intensity > thresh):
-            if (lightSensor1.ambient_light_intensity > lightSensor2.ambient_light_intensity):
+        if(rightSensor.ambient_light_intensity > thresh or leftSensor.ambient_light_intensity > thresh):
+            if (rightSensor.ambient_light_intensity > leftSensor.ambient_light_intensity):
                 motorRight.run_forever(speed_sp=280)
                 motorLeft.run_forever(speed_sp=10)
             else:
@@ -49,18 +49,18 @@ def agressive(thresh):
     motorRight.run_forever(speed_sp=280)
 
     while(True):
-        if(lightSensor1.ambient_light_intensity > thresh or lightSensor2.ambient_light_intensity > thresh):
-            if (lightSensor1.ambient_light_intensity > lightSensor2.ambient_light_intensity):
+        if(rightSensor.ambient_light_intensity > thresh or leftSensor.ambient_light_intensity > thresh):
+            if (rightSensor.ambient_light_intensity > leftSensor.ambient_light_intensity):
                 motorLeft.run_forever(speed_sp=280)
                 motorRight.run_forever(speed_sp=10)
             else:
                 motorLeft.run_forever(speed_sp=10)
                 motorRight.run_forever(speed_sp=280)
 
-            if(lightSensor1.ambient_light_intensity > 50 or lightSensor2.ambient_light_intensity > 50):
-                motorLeft.stop()
-                motorRight.stop()
-                break
+        #    if(rightSensor.ambient_light_intensity > 50 or leftSensor.ambient_light_intensity > 50):
+        #        motorLeft.stop()
+        #        motorRight.stop()
+        #        break
         else:
             motorLeft.run_forever(speed_sp=280)
             motorRight.run_forever(speed_sp=280)

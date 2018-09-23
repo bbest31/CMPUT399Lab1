@@ -38,9 +38,25 @@ straightLine(250, 4)
 # Rotating Movement
 
 
-def rotation(leftSpeed, rightSpeed, sec):
+rotation(20)
+
+
+
+#distance:float. Distance that we want the robot to travel in meters
+#returns: float. The error, defined by the actual distance (according to the enconders)
+#                and the expected distance
+def straightLineError(distance):
+    return 0
+
+
+#angle:float. The angle we want the robot to rotate (in degrees)
+#returns: float. The error, defined by the actual distance (according to the enconders)
+#                and the expected distance
+def rotationError(angle):
+
     startAngle = gy.value()
-    motorRight.run_timed(time_sp=sec * 1000, speed_sp=rightSpeed)
-    motorLeft.run_timed(time_sp=sec * 1000, speed_sp=leftSpeed)
-    sleep(sec+1)
+    motorRight.run_timed(time_sp=10 * 1000, speed_sp=180)
+    motorLeft.run_timed(time_sp=10 * 1000, speed_sp=-180)
+    sleep(10)
     print('Angle deviation = '+str(abs(startAngle-gy.value())))
+    return 0
