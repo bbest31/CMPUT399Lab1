@@ -10,7 +10,7 @@ import threading
 # Global constants for this file.
 
 # In seconds
-timeDelta = 0.5
+timeDelta = 0.02
 # In meters
 wheelDiameter = 5.5/100
 # In meters
@@ -116,30 +116,13 @@ def positionY(velocityTimeSeries, angularVelocityTimeSeries):
     return x*timeDelta
 
 
-def measure():
-    previousTachoReadingLeft = motorLeft.position
-    previousTachoReadingRight = motorRight.position
-    # Store every single measurement of the angular velocity
-    wTimeSeries = []
-    # Store every single measurement of the velocity
-    vTimeseries = []
-    # If we wanted to figure out at how many seconds a particular measurement vTimeseries[i] was taken, we just have to multiply:  i*timeDelta
-    while True:
-        # Gather measurements every timeDelta seconds
-        sleep(timeDelta)
-        currentTachoReadingLeft = motorLeft.position
-        currentTachoReadingRight = motorRight.position
-        wTimeSeries.append(angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
-                                           currentTachoReadingRight, previousTachoReadingRight))
-        vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
-                                           currentTachoReadingRight, previousTachoReadingRight))
-        file.write("--------------------------------\n")
-        file.write("Theta(t): " + str(theta(wTimeSeries)) + "\n")
-        file.write("PosX(t): " + str(positionX(vTimeseries, wTimeSeries))+"\n")
-        file.write("PosY(t): " + str(positionY(vTimeseries, wTimeSeries))+"\n")
-        # After all measurements are taken:
-        previousTachoReadingLeft = currentTachoReadingLeft
-        previousTachoReadingRight = currentTachoReadingRight
+# Store every single measurement of the angular velocity
+wTimeSeries = []
+# Store every single measurement of the velocity
+vTimeseries = []
+
+
+
 
 ###########
 # End of Functions for measurement
@@ -152,30 +135,70 @@ Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
 # commands correspond to [left-motor-speed, right-motor-speed, time duration (s)]
-commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
-#commands = [[20,40,4]]
+#commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
+commands = [[20,40,2]]
 
 # Start measurement thread. This is a daemon thread which will terminate once
 # The main program terminates.
-measuringThread = threading.Thread(target=measure, daemon=True)
-measuringThread.start()
+#measuringThread = threading.Thread(target=measure, daemon=True)
+#measuringThread.start()
+
+
+totalTimeForCommands = 0
+
+for command in commands:
+    totalTimeForCommands = totalTimeForCommands + command[2]
+runTime = 0
+
+#Selects the relevant command based on the runtime
+def selectCommand(runTime):
+    timeSummation = 0
+    for command in commands:
+        if (runTime <= timeSummation):
+            return command
+        else:
+            timeSummation = timeSummation + command[2]
+
 
 
 # Run the commands given in the variable
 # TODO instead of multithreading we could also consider refreshing this loop
 #     every timeDelta seconds, and then figuring out when enough seconds have passed
 #     so that we can move to the next instruction.
-for command in commands:
-    file.write("Gyro Angle start for command " +
-               str(command) + " : " + str(gy.value()) + "\n")
-    runTime = command[2]*1000
-    leftSpeed = (command[0]*0.01)*900
-    rightSpeed = (command[1]*0.01)*900
-    currentAngle = gy.value()
-    motorRight.run_timed(time_sp=runTime, speed_sp=rightSpeed)
-    motorLeft.run_timed(time_sp=runTime, speed_sp=leftSpeed)
-    sleep(command[2]+1)
-    file.write("Gyro Angle end for command " +
-               str(command) + " : " + str(gy.value()) + "\n")
+currentTachoReadingLeft = motorLeft.position
+currentTachoReadingRight = motorRight.position
+command = commands[0]
+leftSpeed = (command[0]*0.01)*900
+rightSpeed = (command[1]*0.01)*900
+motorRight.run_timed(speed_sp=rightSpeed, time_sp=command[2]*1000)
+motorLeft.run_timed(speed_sp=leftSpeed, time_sp=command[2]*1000)
+posX=0
+posY=0
+angle=0
+while (runTime <= 4):
+
+    previousTachoReadingLeft = currentTachoReadingLeft
+    previousTachoReadingRight = currentTachoReadingRight
+    sleep(timeDelta)
+    runTime = runTime+timeDelta
+    currentTachoReadingLeft = motorLeft.position
+    currentTachoReadingRight = motorRight.position
+    
+    wTimeSeries.append(angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
+                                           currentTachoReadingRight, previousTachoReadingRight))
+    vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
+                                           currentTachoReadingRight, previousTachoReadingRight))
+
+
+angle = angle + theta(wTimeSeries)
+posX = posX + positionX(vTimeseries, wTimeSeries)
+posY = posY + positionY(vTimeseries, wTimeSeries)
+
+file.write("--------------------------------\n")
+file.write("Theta1(t): " + str(angle) + "\n")
+file.write("PosX1(t): " + str(posX)+"\n")
+file.write("PosY1(t): " + str(posY)+"\n")
+motorRight.stop()
+motorLeft.stop()
 
 file.close()

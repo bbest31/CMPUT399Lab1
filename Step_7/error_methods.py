@@ -42,7 +42,7 @@ sleep(0.5)
 #                and the expected distance
 def straightLineError(distance):
     #In seconds
-    timeOfMovement = (x/wheelVelocity)
+    timeOfMovement = (distance/wheelVelocity)
     #Sensor Data
     #Current reading of the tachometer of each wheel  (in degrees)
     startingTachoReadingLeft = motorLeft.position
@@ -89,7 +89,7 @@ def rotationError(angle):
     #Total distance that the robot has to "traverse", represented the longitude the arc of the
     #circle formed when the robot rotates in place by "angle" degrees 
 
-    #We use pi because wheels are rotating 90 degrees per second
+    #We use pi because wheels are rotating 270 degrees per second
     #In meters per second
     velocityOfLeftWheel = -(3*pi/2)*(wheelDiameter/2)
     velocityOfRightWheel = (3*pi/2)*(wheelDiameter/2)
@@ -120,3 +120,5 @@ def rotationError(angle):
 
 
 rotationError(90)
+sleep(3)
+straightLineError(0.35)
