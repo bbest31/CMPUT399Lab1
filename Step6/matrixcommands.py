@@ -108,8 +108,8 @@ Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
 # commands correspond to [left-motor-speed, right-motor-speed, time duration (s)]
-#commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
-commands = [[20,40,4]]
+commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
+#commands = [[20,40,4]]
 
 # Start measurement thread. This is a daemon thread which will terminate once
 # The main program terminates.
@@ -122,13 +122,14 @@ commands = [[20,40,4]]
 #     every timeDelta seconds, and then figuring out when enough seconds have passed
 #     so that we can move to the next instruction.
 currentTachoReadingLeft = motorLeft.position
-currentTachoReadingRight = motorRight.positionX
+currentTachoReadingRight = motorRight.position
 posX=0
 posY=0
 angle=0
 
 
 for command in commands:
+    runTime = 0
     leftSpeed = (command[0]*0.01)*900
     rightSpeed = (command[1]*0.01)*900
     motorRight.run_timed(speed_sp=rightSpeed, time_sp=command[2]*1000)
@@ -154,10 +155,13 @@ for command in commands:
         posY = posY + positionY(currentVehicleVelocity, angle)
     sleep(0.5)
 
-print("--------------------------------\n")
-print("Theta1(t): " + str(angle) + "\n")
-print("PosX1(t): " + str(posX)+"\n")
-print("PosY1(t): " + str(posY)+"\n")
+file.write("--------------------------------\n")
+file.write("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+file.write("PosX1(t): %.2f m\n" % (posX*100))
+file.write("PosY1(t): %.2f m\n" % (posY*100))
+print("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+print("PosX1(t): %.2f m\n" % (posX*100))
+print("PosY1(t): %.2f m\n" % (posY*100))
 motorRight.stop()
 motorLeft.stop()
 

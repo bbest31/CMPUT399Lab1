@@ -55,36 +55,31 @@ def turnRight():
 
     firstReading = gy.angle
     sleep(0.5)
-    currentGyroAngle = 0
-    print('start angle = '+str(firstReading))
-    while(currentGyroAngle <= 90):
-        motorLeft.run_forever(speed_sp=45)
-        motorRight.run_forever(speed_sp=-45)
-        currentGyroAngle = abs(gy.angle-firstReading)
-        print(str(currentGyroAngle))
+    currentGyroAngle = gy.value()
+    print(str(currentGyroAngle))
+    while(abs(currentGyroAngle - gy.value()) < 90):
+        print(str(gy.value()))
+        motorLeft.run_forever(speed_sp=-65)
+        # motorRight.run_forever(speed_sp=65)
     motorLeft.stop()
     motorRight.stop()
     sleep(1)
-    angle = gy.value()
-    print('final angle = '+str(angle))
-
-    print('Angle in relation to original = '+str(angle-firstReadings))
 
 def runHeight():
     startAngle = gy.value()
-    motorRight.run_timed(time_sp=1000, speed_sp=180)
-    motorLeft.run_timed(time_sp=1000, speed_sp=180)
-    deviation = gy.value()-startAngle
-    print("Angle deviation from line = "+str(deviation))
+    motorRight.run_timed(time_sp=2500, speed_sp=180)
+    motorLeft.run_timed(time_sp=2500, speed_sp=180)
+    # deviation = gy.value()-startAngle
+    # print("Angle deviation from line = "+str(deviation))
     sleep(2)
 
 def runWidth():
     #Width
     startAngle = gy.value()
-    motorRight.run_timed(time_sp=2000, speed_sp=180)
-    motorLeft.run_timed(time_sp=2000, speed_sp=180)
-    deviation = gy.value()-startAngle
-    print("Angle deviation from line = "+str(deviation))
+    motorRight.run_timed(time_sp=4000, speed_sp=180)
+    motorLeft.run_timed(time_sp=4000, speed_sp=180)
+    # deviation = gy.value()-startAngle
+    # print("Angle deviation from line = "+str(deviation))
     sleep(3)
 
 motorRight = LargeMotor(OUTPUT_C)
@@ -96,7 +91,7 @@ assert motorLeft.connected
 Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
-numberOfRectangles=3
+numberOfRectangles=1
 
 
 for i in range(0,numberOfRectangles):
