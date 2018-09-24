@@ -67,4 +67,5 @@ for i in range(0, numberOfRectangles):
     runHeight()
     turnRight()
     runWidth()
+    turnRight()
     sleep(0.5)
