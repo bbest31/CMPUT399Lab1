@@ -5,6 +5,7 @@
 
 from time import sleep
 from ev3dev.ev3 import *
+from math import *
 
 # Connect gyro
 gy = GyroSensor() 
@@ -16,7 +17,8 @@ units = gy.units
 #reports 'deg' meaning degrees
 
 def rotation(angle):
-    intialValue = gy.value()
+    wheelDiameter = 5.5/100
+
     #In meters
     robotAxle = 10.7/100
     #The circle that the robots draws when rotating in place
