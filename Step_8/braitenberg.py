@@ -111,6 +111,7 @@ def love(thresh):
         motorRight.run_forever(speed_sp=280)
 
 
+# Adjusting method which makes the robot turn in the direction of the brightest light
 def adjust(i):
     if(i == 0):
         motorRight.run_forever(speed_sp=200)
@@ -128,6 +129,7 @@ def explorer(thresh):
     bestIntensity = thresh
     while(True):
         if(rightSensor.ambient_light_intensity > thresh or leftSensor.ambient_light_intensity > thresh):
+            # Sets the best intensity found
             bestIntensity = max(bestIntensity, max(
                 rightSensor.ambient_light_intensity, leftSensor.ambient_light_intensity))
             if(rightSensor.ambient_light_intensity > leftSensor.ambient_light_intensity):
@@ -141,8 +143,3 @@ def explorer(thresh):
         motorRight.run_forever(speed_sp=280)
 
 
-# 8 or 10 is a good threshold since the ambient light in the lab is between 4-5
-# agressive(8)
-# fear(8)
-# love(8)
-# explorer(3)

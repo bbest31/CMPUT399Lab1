@@ -16,7 +16,7 @@ wheelDiameter = 5.5/100
 # In meters
 wheelCircumference = 17.3/100
 # In meters
-vehicleWidth = 10.7/100
+vehicleWidth = 11.7/100
 file = open("dead_reckoning_output", "w")
 
 # Motors
@@ -102,7 +102,6 @@ def positionY(velocity, angle):
 ###########
 
 
-pos = [0, 0]
 
 Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
@@ -156,12 +155,12 @@ for command in commands:
     sleep(0.5)
 
 file.write("--------------------------------\n")
-file.write("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
-file.write("PosX1(t): %.2f m\n" % (posX*100))
-file.write("PosY1(t): %.2f m\n" % (posY*100))
-print("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
-print("PosX1(t): %.2f m\n" % (posX*100))
-print("PosY1(t): %.2f m\n" % (posY*100))
+file.write("Theta(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+file.write("PosX(t): %.2f cm\n" % (posX*100))
+file.write("PosY(t): %.2f cm\n" % (posY*100))
+print("Theta(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+print("PosX(t): %.2f cm\n" % (posX*100))
+print("PosY(t): %.2f cm\n" % (posY*100))
 motorRight.stop()
 motorLeft.stop()
 

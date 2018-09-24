@@ -40,7 +40,7 @@ def leftCircle():
     while(abs(gy.value() - startAngle) <= 315):
         motorRight.run_forever(speed_sp=180)
         motorLeft.run_forever(speed_sp=45)
-        print('Gyroscope value:'+str(gy.value()) +' - Started Value: '+str(startAngle)+ ' Delta: '+str(abs(gy.value()-startAngle)))
+        # print('Gyroscope value:'+str(gy.value()) +' - Started Value: '+str(startAngle)+ ' Delta: '+str(abs(gy.value()-startAngle)))
     motorRight.stop()
     motorLeft.stop()
     sleep(0.5)

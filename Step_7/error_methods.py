@@ -90,7 +90,7 @@ def rotationError(angle, degreesPerSecond=270):
 
     intialValue = gy.value()
     #In meters
-    robotAxle = 10.7/100
+    robotAxle = 11.7/100
     #The circle that the robots draws when rotating in place
     circumference = (robotAxle*pi)
 
@@ -116,12 +116,13 @@ def rotationError(angle, degreesPerSecond=270):
     endAngle = abs(gy.value()- intialValue)
 
     print("The angle entered was: " + str(angle) + " degrees")
-    print("The distance as calculated by using the gyroscope was: " + str(endAngle) + " degrees")
+    print("The angle as calculated by using the gyroscope was: " + str(endAngle) + " degrees")
     print("The absolute error is " + str(angle - endAngle))
     print("The relative error is "+ str((angle - endAngle)/endAngle))
 
 
-
+print("Rotation")
 rotationError(90)
 sleep(3)
+print("Straight Line")
 straightLineError(0.35)
