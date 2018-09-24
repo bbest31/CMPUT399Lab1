@@ -5,6 +5,8 @@
 
 from time import sleep
 from ev3dev.ev3 import *
+from math import *
+
 
 motorRight = LargeMotor(OUTPUT_C)
 motorLeft = LargeMotor(OUTPUT_B)
@@ -81,16 +83,17 @@ def straightLineError(distance):
 def rotationError(angle):
 
     startAngle = gy.value()
+    circumference = (14.5*pi)/100
     #Total distance that the robot has to "traverse", represented the longitude the arc of the
     #circle formed when the robot rotates in place by "angle" degrees 
-    arcLength = (degrees/360)*wheelCircumference
-    
-    #In seconds
-    timeOfMovement = (arcLength/wheelVelocity)
-
-    motorRight.run_timed(time_sp=timeOfMovement * 1000, speed_sp=180)
-    motorLeft.run_timed(time_sp=timeOfMovement * 1000, speed_sp=-180)
-    sleep(timeOfMovement + 0.5)
+    arcLength = (angle/360)*circumference
+    print ("arc length: " + str(arcLength))
+    #In miliseconds
+    timeOfMovement = int((arcLength/(wheelVelocity))*1000)
+    print("TIme of movement " + str(timeOfMovement))
+    motorRight.run_timed(time_sp=timeOfMovement, speed_sp=180)
+    motorLeft.run_timed(time_sp=timeOfMovement, speed_sp=-180)
+    sleep(timeOfMovement/1000 + 0.5)
 
     endAngle = gy.value()
     angleDelta = endAngle - startAngle
@@ -99,3 +102,7 @@ def rotationError(angle):
     print("The distance as calculated by using the gyroscope was: " + str(angleDelta) + " meters")
     print("The absolute error is " + str(angle - angleDelta))
     print("The relative error is "+ str((angle - angleDelta)/angleDelta))
+
+
+
+rotationError(90)
