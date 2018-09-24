@@ -22,12 +22,10 @@ gy.mode = 'GYRO-ANG'
 
 #In meters
 wheelDiameter = 5.5/100
-#Degrees per second for the wheels
-degreesPerSecond = 180
+
 #Wheel circumference in meters
 wheelCircumference = wheelDiameter*pi
-#Speed for the wheels, in meters per second
-wheelVelocity = ((wheelCircumference)*(degreesPerSecond/360))
+
 #-------------------------
 
 assert motorRight.connected
@@ -36,20 +34,24 @@ assert motorLeft.connected
 Leds.set_color(Leds.LEFT,  Leds.ORANGE)
 sleep(0.5)
 
+def wheelVelocity(degreesPerSecond):
+    return ((wheelCircumference)*(degreesPerSecond/360))
+
 
 #distance:float. Distance that we want the robot to travel in meters (must be positive)
+#degreesPerSecond:integer. (Optional Parameter) the degrees per second the wheels are supposed to rotate
 #returns: float. The error, defined by the actual distance (according to the enconders)
 #                and the expected distance
-def straightLineError(distance):
+def straightLineError(distance, degreesPerSecond=180):
     #In seconds
-    timeOfMovement = (distance/wheelVelocity)
+    timeOfMovement = (distance/wheelVelocity(degreesPerSecond))
     #Sensor Data
     #Current reading of the tachometer of each wheel  (in degrees)
     startingTachoReadingLeft = motorLeft.position
     startingTachoReadingRight = motorRight.position
 
-    motorRight.run_timed(time_sp=timeOfMovement * 1000, speed_sp=180)
-    motorLeft.run_timed(time_sp=timeOfMovement * 1000, speed_sp=180)
+    motorRight.run_timed(time_sp=timeOfMovement * 1000, speed_sp=degreesPerSecond)
+    motorLeft.run_timed(time_sp=timeOfMovement * 1000, speed_sp=degreesPerSecond)
     
     sleep(timeOfMovement + 0.5)
     #Sensor Data
@@ -78,36 +80,37 @@ def straightLineError(distance):
 
 
 #angle:float. The angle we want the robot to rotate (in degrees, must be positive)
+#degreesPerSecond:integer. (Optional Parameter) the degrees per second the wheels are supposed to rotate
+#                     in this case the right wheel will turn degreesPerSecond and the left -degreesPerSecond 
 #returns: float. The error, defined by the actual distance (according to the enconders)
 #                and the expected distance
-def rotationError(angle):
+def rotationError(angle, degreesPerSecond=270):
+    
+    degreesPerSecondInRadians = (degreesPerSecond*2*pi)/360
+
     intialValue = gy.value()
     #In meters
     robotAxle = 10.7/100
     #The circle that the robots draws when rotating in place
     circumference = (robotAxle*pi)
-    #Total distance that the robot has to "traverse", represented the longitude the arc of the
-    #circle formed when the robot rotates in place by "angle" degrees 
 
-    #We use pi because wheels are rotating 270 degrees per second
-    #In meters per second
-    velocityOfLeftWheel = -(3*pi/2)*(wheelDiameter/2)
-    velocityOfRightWheel = (3*pi/2)*(wheelDiameter/2)
+    #In meters per second (radius of wheel * angular velocity of wheel (radians per second))
+    velocityOfLeftWheel = -(degreesPerSecondInRadians)*(wheelDiameter/2)
+    velocityOfRightWheel = (degreesPerSecondInRadians)*(wheelDiameter/2)
 
     #Angular velocity of vehicle in radians per second
     angularVelocityOfVehicle = (velocityOfRightWheel - velocityOfLeftWheel)/robotAxle
 
-    #We convert the angle to radians
+    #We convert the given angle of rotation to radians
     angleInRadians = (angle*2*pi)/360
 
-    #We use a rule of 3 to figure out how long should It take to get to the given angle
-    #with the angularVelocityOfVehicle
-    # this in seconds
+    #Time that the robot should be moving at the given angular velocity in order to rotate
+    #   the amound given specified by the given angle. This is in seconds
     timeOfMovement = angleInRadians/angularVelocityOfVehicle
 
-    print("TIme of movement " + str(timeOfMovement))
-    motorRight.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=270)
-    motorLeft.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=-270)
+    print("Time of movement " + str(timeOfMovement))
+    motorRight.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=degreesPerSecond)
+    motorLeft.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=-degreesPerSecond)
     sleep(timeOfMovement/1000 + 0.5)
 
     endAngle = abs(gy.value()- intialValue)
