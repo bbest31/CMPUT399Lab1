@@ -137,4 +137,4 @@ def explorer(thresh):
 # agressive(8)
 # fear(8)
 # love(8)
-explorer(3)
+#explorer(3)
