@@ -21,8 +21,12 @@ assert motorLeft.connected
 Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
+
 startAngle = gy.value()
-while(gy.value() <= startAngle + 360):
+
+numberOfCircles = 3
+
+while(gy.value() <= startAngle + (360*numberOfCircles)):
     motorLeft.run_forever(speed_sp=180)
     motorRight.run_forever(speed_sp=45)
 motorLeft.stop()

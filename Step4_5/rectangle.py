@@ -5,6 +5,7 @@
 
 from time import sleep
 from ev3dev.ev3 import *
+from math import *
 
 # Connect gyro
 gy = GyroSensor() 
@@ -15,33 +16,71 @@ gy.mode='GYRO-ANG'
 units = gy.units
 #reports 'deg' meaning degrees
 
-def turnLeft():
-    startAngle = gy.value()
-    while(gy.value() <= startAngle+90):
-        motorLeft.run_forever(speed_sp=180)
-        motorRight.run_forever(speed_sp=-180)
+def rotation(angle):
+    wheelDiameter = 5.5/100
+
+    #In meters
+    robotAxle = 10.7/100
+    #The circle that the robots draws when rotating in place
+    circumference = (robotAxle*pi)
+    #Total distance that the robot has to "traverse", represented the longitude the arc of the
+    #circle formed when the robot rotates in place by "angle" degrees 
+
+    #We use pi because wheels are rotating 90 degrees per second
+    #In meters per second
+    velocityOfLeftWheel = (3*pi/2)*(wheelDiameter/2)
+    velocityOfRightWheel = -(3*pi/2)*(wheelDiameter/2)
+
+    #Angular velocity of vehicle in radians per second
+    angularVelocityOfVehicle = abs(velocityOfRightWheel - velocityOfLeftWheel)/robotAxle
+
+    #We convert the angle to radians
+    angleInRadians = (angle*2*pi)/360
+
+    #We use a rule of 3 to figure out how long should It take to get to the given angle
+    #with the angularVelocityOfVehicle
+    # this in seconds
+    timeOfMovement = angleInRadians/angularVelocityOfVehicle
+
+    motorRight.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=-270)
+    motorLeft.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=270)
+    sleep(timeOfMovement/1000 + 0.5)
+
+
+
+
+def turnRight():
+    gy = GyroSensor() 
+    gy.mode='GYRO-ANG'
+
+    firstReading = gy.angle
+    sleep(0.5)
+    currentGyroAngle = gy.value()
+    print(str(currentGyroAngle))
+    while(abs(currentGyroAngle - gy.value()) < 90):
+        print(str(gy.value()))
+        motorLeft.run_forever(speed_sp=-65)
+        # motorRight.run_forever(speed_sp=65)
     motorLeft.stop()
     motorRight.stop()
     sleep(1)
-    angle = gy.value()
-    print('Angle in relation to original = '+str(angle))
 
 def runHeight():
     startAngle = gy.value()
-    motorRight.run_timed(time_sp=2000, speed_sp=180)
-    motorLeft.run_timed(time_sp=2000, speed_sp=180)
-    deviation = gy.value()-startAngle
-    print("Angle deviation from line = "+str(deviation))
-    sleep(3)
+    motorRight.run_timed(time_sp=2500, speed_sp=180)
+    motorLeft.run_timed(time_sp=2500, speed_sp=180)
+    # deviation = gy.value()-startAngle
+    # print("Angle deviation from line = "+str(deviation))
+    sleep(2)
 
 def runWidth():
     #Width
     startAngle = gy.value()
     motorRight.run_timed(time_sp=4000, speed_sp=180)
     motorLeft.run_timed(time_sp=4000, speed_sp=180)
-    deviation = gy.value()-startAngle
-    print("Angle deviation from line = "+str(deviation))
-    sleep(5)
+    # deviation = gy.value()-startAngle
+    # print("Angle deviation from line = "+str(deviation))
+    sleep(3)
 
 motorRight = LargeMotor(OUTPUT_C)
 motorLeft = LargeMotor(OUTPUT_B)
@@ -52,15 +91,20 @@ assert motorLeft.connected
 Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
-#Rectangle
-runHeight()
-turnLeft()
-runWidth()
-turnLeft()
-runHeight()
-turnLeft()
-runWidth()
-turnLeft()
+numberOfRectangles=1
+
+
+for i in range(0,numberOfRectangles):
+    #Rectangle
+    runHeight()
+    rotation(90)
+    runWidth()
+    rotation(90)
+    runHeight()
+    rotation(90)
+    runWidth()
+    rotation(90)
+    sleep(0.5)
 
 
 

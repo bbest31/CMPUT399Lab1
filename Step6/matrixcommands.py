@@ -10,13 +10,13 @@ import threading
 # Global constants for this file.
 
 # In seconds
-timeDelta = 0.5
+timeDelta = 0.02
 # In meters
 wheelDiameter = 5.5/100
 # In meters
 wheelCircumference = 17.3/100
 # In meters
-vehicleWidth = 14.5/100
+vehicleWidth = 10.7/100
 file = open("dead_reckoning_output", "w")
 
 # Motors
@@ -82,64 +82,20 @@ def radiusOfRotation(currentTachoReadingLeft, previousTachoReadingLeft, currentT
 # returns: float. angle of rotation in radians
 
 
-def theta(angularVelocityTimeSeries):
-    # This is an approximation of an integral by using a Riemann sum
-    theta = 0
-    for measurement in angularVelocityTimeSeries:
-        theta = theta + measurement
-    return theta*timeDelta
+def theta(angule):
+    return angule*timeDelta
 
 # angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
 # velocityTimeSeries: list<float>. Contains the discrete measurements for the linear velocity from 0 to (len(velocityTimeSeries)-1)*deltaTime seconds
 # returns: float. the x coordinate measured from the point of origin. In meters.
-
-
-def positionX(velocityTimeSeries, angularVelocityTimeSeries):
-    # This is an approximation of an integral by using a Riemann sum
-    x = 0
-    for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement
-    x = x * cos(theta(angularVelocityTimeSeries))
-    return x*timeDelta
+def positionX(velocity, angle):
+    return velocity*cos(angle)*timeDelta
 
 # angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
 # velocityTimeSeries: list<float>. Contains the discrete measurements for the linear velocity from 0 to (len(velocityTimeSeries)-1)*deltaTime seconds
 # returns: float. the x coordinate measured from the point of origin. In meters.
-
-
-def positionY(velocityTimeSeries, angularVelocityTimeSeries):
-    # This is an approximation of an integral by using a Riemann sum
-    x = 0
-    for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement
-    x = x * sin(theta(angularVelocityTimeSeries))
-    return x*timeDelta
-
-
-def measure():
-    previousTachoReadingLeft = motorLeft.position
-    previousTachoReadingRight = motorRight.position
-    # Store every single measurement of the angular velocity
-    wTimeSeries = []
-    # Store every single measurement of the velocity
-    vTimeseries = []
-    # If we wanted to figure out at how many seconds a particular measurement vTimeseries[i] was taken, we just have to multiply:  i*timeDelta
-    while True:
-        # Gather measurements every timeDelta seconds
-        sleep(timeDelta)
-        currentTachoReadingLeft = motorLeft.position
-        currentTachoReadingRight = motorRight.position
-        wTimeSeries.append(angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
-                                           currentTachoReadingRight, previousTachoReadingRight))
-        vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
-                                           currentTachoReadingRight, previousTachoReadingRight))
-        file.write("--------------------------------\n")
-        file.write("Theta(t): " + str(theta(wTimeSeries)) + "\n")
-        file.write("PosX(t): " + str(positionX(vTimeseries, wTimeSeries))+"\n")
-        file.write("PosY(t): " + str(positionY(vTimeseries, wTimeSeries))+"\n")
-        # After all measurements are taken:
-        previousTachoReadingLeft = currentTachoReadingLeft
-        previousTachoReadingRight = currentTachoReadingRight
+def positionY(velocity, angle):
+    return velocity*sin(angle)*timeDelta
 
 ###########
 # End of Functions for measurement
@@ -157,25 +113,56 @@ commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
 
 # Start measurement thread. This is a daemon thread which will terminate once
 # The main program terminates.
-measuringThread = threading.Thread(target=measure, daemon=True)
-measuringThread.start()
+#measuringThread = threading.Thread(target=measure, daemon=True)
+#measuringThread.start()
 
 
 # Run the commands given in the variable
 # TODO instead of multithreading we could also consider refreshing this loop
 #     every timeDelta seconds, and then figuring out when enough seconds have passed
 #     so that we can move to the next instruction.
+currentTachoReadingLeft = motorLeft.position
+currentTachoReadingRight = motorRight.position
+posX=0
+posY=0
+angle=0
+
+
 for command in commands:
-    file.write("Gyro Angle start for command " +
-               str(command) + " : " + str(gy.value()) + "\n")
-    runTime = command[2]*1000
+    runTime = 0
     leftSpeed = (command[0]*0.01)*900
     rightSpeed = (command[1]*0.01)*900
-    currentAngle = gy.value()
-    motorRight.run_timed(time_sp=runTime, speed_sp=rightSpeed)
-    motorLeft.run_timed(time_sp=runTime, speed_sp=leftSpeed)
-    sleep(command[2]+1)
-    file.write("Gyro Angle end for command " +
-               str(command) + " : " + str(gy.value()) + "\n")
+    motorRight.run_timed(speed_sp=rightSpeed, time_sp=command[2]*1000)
+    motorLeft.run_timed(speed_sp=leftSpeed, time_sp=command[2]*1000)
+    while (runTime <= command[2]):
+        wTimeSeries = []
+        vTimeSeries = []
+        angleTimeSeries = []
+        previousTachoReadingLeft = currentTachoReadingLeft
+        previousTachoReadingRight = currentTachoReadingRight
+        sleep(timeDelta)
+        runTime = runTime+timeDelta
+        currentTachoReadingLeft = motorLeft.position
+        currentTachoReadingRight = motorRight.position
+        
+        currentAngularVelocity = angularVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
+                                            currentTachoReadingRight, previousTachoReadingRight)
+        currentVehicleVelocity = vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
+                                            currentTachoReadingRight, previousTachoReadingRight)
+        
+        angle = angle + theta(currentAngularVelocity)
+        posX = posX + positionX(currentVehicleVelocity, angle)
+        posY = posY + positionY(currentVehicleVelocity, angle)
+    sleep(0.5)
+
+file.write("--------------------------------\n")
+file.write("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+file.write("PosX1(t): %.2f m\n" % (posX*100))
+file.write("PosY1(t): %.2f m\n" % (posY*100))
+print("Theta1(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+print("PosX1(t): %.2f m\n" % (posX*100))
+print("PosY1(t): %.2f m\n" % (posY*100))
+motorRight.stop()
+motorLeft.stop()
 
 file.close()
