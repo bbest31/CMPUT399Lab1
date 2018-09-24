@@ -107,10 +107,11 @@ def adjust(i):
     if(i == 0):
         motorRight.run_forever(speed_sp=200)
         motorLeft.run_forever(speed_sp=280)
-        
+
     else:
         motorRight.run_forever(speed_sp=280)
         motorLeft.run_forever(speed_sp=200)
+
 
 def explorer(thresh):
     motorLeft.run_forever(speed_sp=280)
@@ -137,5 +138,3 @@ def explorer(thresh):
 # fear(8)
 # love(8)
 explorer(3)
-
-
