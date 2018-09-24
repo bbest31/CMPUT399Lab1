@@ -1,3 +1,6 @@
-from braitenberg import agressive
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
-agressive(8)
+from braitenberg import *
+
+aggressive(8)

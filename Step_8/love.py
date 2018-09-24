@@ -1,3 +1,6 @@
-from braitenberg import love
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from braitenberg import *
 
 love(8)

@@ -9,7 +9,7 @@ motorLeft = LargeMotor(OUTPUT_B)
 
 # Connect Color Sensors
 rightSensor = ColorSensor(INPUT_4)
-leftSensor = ColorSensor(INPUT_2)
+leftSensor = ColorSensor(INPUT_1)
 
 # Put the color sensors into AMBIENT mode.
 leftSensor.mode = 'COL-AMBIENT'
@@ -40,18 +40,28 @@ def fear(thresh):
             motorRight.run_forever(speed_sp=280)
 
 
-def agressive(thresh):
+def aggressive(thresh):
 
     motorLeft.run_forever(speed_sp=280)
     motorRight.run_forever(speed_sp=280)
 
     while(True):
+
+        sensorDelta = rightSensor.ambient_light_intensity - \
+            leftSensor.ambient_light_intensity
+
+        # Smoother turns when delta is small
+        if (abs(sensorDelta) <= 2):
+            speedModifier = 15
+        else:
+            speedModifier = 1
+
         if(rightSensor.ambient_light_intensity > thresh or leftSensor.ambient_light_intensity > thresh):
             if (rightSensor.ambient_light_intensity > leftSensor.ambient_light_intensity):
                 motorLeft.run_forever(speed_sp=280)
-                motorRight.run_forever(speed_sp=10)
+                motorRight.run_forever(speed_sp=10*speedModifier)
             else:
-                motorLeft.run_forever(speed_sp=10)
+                motorLeft.run_forever(speed_sp=10*speedModifier)
                 motorRight.run_forever(speed_sp=280)
 
         else:
@@ -95,8 +105,6 @@ def love(thresh):
 
             if ((rightSensor.ambient_light_intensity >= thresh*5 or leftSensor.ambient_light_intensity >= thresh*5) and abs(sensorDelta) <= 2):
                 break
-            # if(ultrasonicSensor.distance_centimeters < 4):
-            #   break
             previousSensorDelta = sensorDelta
 
         motorLeft.run_forever(speed_sp=280)
@@ -137,4 +145,4 @@ def explorer(thresh):
 # agressive(8)
 # fear(8)
 # love(8)
-#explorer(3)
+# explorer(3)

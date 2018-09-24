@@ -1,3 +1,6 @@
-from braitenberg import explorer
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from braitenberg import *
 
 explorer(3)
