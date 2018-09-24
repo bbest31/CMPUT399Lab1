@@ -107,8 +107,8 @@ Leds.set_color(Leds.LEFT,  Leds.RED)
 sleep(0.5)
 
 # commands correspond to [left-motor-speed, right-motor-speed, time duration (s)]
-commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
-#commands = [[20,40,4]]
+#commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
+commands = [[20,40,2]]
 
 # Start measurement thread. This is a daemon thread which will terminate once
 # The main program terminates.
@@ -154,11 +154,12 @@ for command in commands:
         posY = posY + positionY(currentVehicleVelocity, angle)
     sleep(0.5)
 
+
 file.write("--------------------------------\n")
-file.write("Theta(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+file.write("Theta(t): " + str(((angle*360)/(2*pi)) % 360) + "\n")
 file.write("PosX(t): %.2f cm\n" % (posX*100))
 file.write("PosY(t): %.2f cm\n" % (posY*100))
-print("Theta(t): " + str(((angle*360)/(2*pi))-360) + "\n")
+print("Theta(t): " + str(((angle*360)/(2*pi)) % 360) + "\n")
 print("PosX(t): %.2f cm\n" % (posX*100))
 print("PosY(t): %.2f cm\n" % (posY*100))
 motorRight.stop()
