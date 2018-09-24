@@ -81,27 +81,41 @@ def straightLineError(distance):
 #returns: float. The error, defined by the actual distance (according to the enconders)
 #                and the expected distance
 def rotationError(angle):
-
-    startAngle = gy.value()
-    circumference = (14.5*pi)/100
+    intialValue = gy.value()
+    #In meters
+    robotAxle = 10.7/100
+    #The circle that the robots draws when rotating in place
+    circumference = (robotAxle*pi)
     #Total distance that the robot has to "traverse", represented the longitude the arc of the
     #circle formed when the robot rotates in place by "angle" degrees 
-    arcLength = (angle/360)*circumference
-    print ("arc length: " + str(arcLength))
-    #In miliseconds
-    timeOfMovement = int((arcLength/(wheelVelocity))*1000)
+
+    #We use pi because wheels are rotating 90 degrees per second
+    #In meters per second
+    velocityOfLeftWheel = -(3*pi/2)*(wheelDiameter/2)
+    velocityOfRightWheel = (3*pi/2)*(wheelDiameter/2)
+
+    #Angular velocity of vehicle in radians per second
+    angularVelocityOfVehicle = (velocityOfRightWheel - velocityOfLeftWheel)/robotAxle
+
+    #We convert the angle to radians
+    angleInRadians = (angle*2*pi)/360
+
+    #We use a rule of 3 to figure out how long should It take to get to the given angle
+    #with the angularVelocityOfVehicle
+    # this in seconds
+    timeOfMovement = angleInRadians/angularVelocityOfVehicle
+
     print("TIme of movement " + str(timeOfMovement))
-    motorRight.run_timed(time_sp=timeOfMovement, speed_sp=180)
-    motorLeft.run_timed(time_sp=timeOfMovement, speed_sp=-180)
+    motorRight.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=270)
+    motorLeft.run_timed(time_sp=int(timeOfMovement * 1000), speed_sp=-270)
     sleep(timeOfMovement/1000 + 0.5)
 
-    endAngle = gy.value()
-    angleDelta = endAngle - startAngle
+    endAngle = abs(gy.value()- intialValue)
 
     print("The angle entered was: " + str(angle) + " degrees")
-    print("The distance as calculated by using the gyroscope was: " + str(angleDelta) + " meters")
-    print("The absolute error is " + str(angle - angleDelta))
-    print("The relative error is "+ str((angle - angleDelta)/angleDelta))
+    print("The distance as calculated by using the gyroscope was: " + str(endAngle) + " degrees")
+    print("The absolute error is " + str(angle - endAngle))
+    print("The relative error is "+ str((angle - endAngle)/endAngle))
 
 
 
