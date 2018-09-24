@@ -94,12 +94,12 @@ def theta(angularVelocityTimeSeries):
 # returns: float. the x coordinate measured from the point of origin. In meters.
 
 
-def positionX(velocityTimeSeries, angleTimeSeries):
+def positionX(velocityTimeSeries, angle):
     # This is an approximation of an integral by using a Riemann sum
     x = 0
     counter = 0
     for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement* cos(angleTimeSeries[counter])
+        x = x + velocityMeasurement* cos(angle)
         counter = counter + 1
     return x*timeDelta
 
@@ -108,12 +108,12 @@ def positionX(velocityTimeSeries, angleTimeSeries):
 # returns: float. the x coordinate measured from the point of origin. In meters.
 
 
-def positionY(velocityTimeSeries, angleTimeSeries):
+def positionY(velocityTimeSeries, angle):
     # This is an approximation of an integral by using a Riemann sum
     x = 0
     counter = 0
     for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement * sin(angleTimeSeries[counter])
+        x = x + velocityMeasurement * sin(angle)
         counter = counter + 1
     return x*timeDelta
 
@@ -181,7 +181,9 @@ prev_angle = 0
 prev_posX = 0
 prev_posY = 0
 while (runTime <= command[2]):
-
+    wTimeSeries = []
+    vTimeSeries = []
+    angleTimeSeries = []
     previousTachoReadingLeft = currentTachoReadingLeft
     previousTachoReadingRight = currentTachoReadingRight
     sleep(timeDelta)
@@ -194,16 +196,18 @@ while (runTime <= command[2]):
     vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
                                            currentTachoReadingRight, previousTachoReadingRight))
     angleTimeSeries.append(theta(wTimeSeries))
-    #angle = angle + (theta(wTimeSeries) - prev_angle)
-    #posX = posX + (positionX(vTimeseries, wTimeSeries, aSeries) - prev_posX)
-    #posY = posY + (positionY(vTimeseries, wTimeSeries, aSeries) - prev_posY)
- 
+    
+    angle = angle + theta(wTimeSeries)
+    posX = posX + positionX(vTimeseries, angle)
+    posY = posY + positionY(vTimeseries, angle)
+    del vTimeseries[:]
+    del wTimeSeries[:]
     #prev_angle = theta(wTimeSeries)
     #prev_posX = positionX(vTimeseries, wTimeSeries, aSeries)
     #prev_posY = positionY(vTimeseries, wTimeSeries, aSeries)
-angle = angle + theta(wTimeSeries)
-posX = posX + positionX(vTimeseries, angleTimeSeries)
-posY = posY + positionY(vTimeseries, angleTimeSeries)
+#angle = angle + theta(wTimeSeries)
+#posX = posX + positionX(vTimeseries, angleTimeSeries)
+#posY = posY + positionY(vTimeseries, angleTimeSeries)
 
 print("--------------------------------\n")
 print("Theta1(t): " + str(angle) + "\n")
