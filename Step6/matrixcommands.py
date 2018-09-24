@@ -94,12 +94,13 @@ def theta(angularVelocityTimeSeries):
 # returns: float. the x coordinate measured from the point of origin. In meters.
 
 
-def positionX(velocityTimeSeries, angularVelocityTimeSeries):
+def positionX(velocityTimeSeries, angleTimeSeries):
     # This is an approximation of an integral by using a Riemann sum
     x = 0
+    counter = 0
     for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement
-    x = x * cos(theta(angularVelocityTimeSeries))
+        x = x + velocityMeasurement* cos(angleTimeSeries[counter])
+        counter = counter + 1
     return x*timeDelta
 
 # angularVelocityTimeSeries: list<float>. Contains the discrete measurements for the angular velocity from 0 to (len(angularVelocityTimeSeries)-1)*deltaTime seconds
@@ -107,12 +108,13 @@ def positionX(velocityTimeSeries, angularVelocityTimeSeries):
 # returns: float. the x coordinate measured from the point of origin. In meters.
 
 
-def positionY(velocityTimeSeries, angularVelocityTimeSeries):
+def positionY(velocityTimeSeries, angleTimeSeries):
     # This is an approximation of an integral by using a Riemann sum
     x = 0
+    counter = 0
     for velocityMeasurement in velocityTimeSeries:
-        x = x + velocityMeasurement
-    x = x * sin(theta(angularVelocityTimeSeries))
+        x = x + velocityMeasurement * sin(angleTimeSeries[counter])
+        counter = counter + 1
     return x*timeDelta
 
 
@@ -120,8 +122,8 @@ def positionY(velocityTimeSeries, angularVelocityTimeSeries):
 wTimeSeries = []
 # Store every single measurement of the velocity
 vTimeseries = []
-
-
+#Stores the angle at every single interval
+angleTimeSeries = []
 
 
 ###########
@@ -136,7 +138,7 @@ sleep(0.5)
 
 # commands correspond to [left-motor-speed, right-motor-speed, time duration (s)]
 #commands = [[80, 60, 2], [60, 60, 1], [-50, 80, 2]]
-commands = [[20,40,2]]
+commands = [[20,40,4]]
 
 # Start measurement thread. This is a daemon thread which will terminate once
 # The main program terminates.
@@ -175,7 +177,10 @@ motorLeft.run_timed(speed_sp=leftSpeed, time_sp=command[2]*1000)
 posX=0
 posY=0
 angle=0
-while (runTime <= 4):
+prev_angle = 0
+prev_posX = 0
+prev_posY = 0
+while (runTime <= command[2]):
 
     previousTachoReadingLeft = currentTachoReadingLeft
     previousTachoReadingRight = currentTachoReadingRight
@@ -188,16 +193,22 @@ while (runTime <= 4):
                                            currentTachoReadingRight, previousTachoReadingRight))
     vTimeseries.append(vehicleVelocity(currentTachoReadingLeft, previousTachoReadingLeft,
                                            currentTachoReadingRight, previousTachoReadingRight))
-
-
+    angleTimeSeries.append(theta(wTimeSeries))
+    #angle = angle + (theta(wTimeSeries) - prev_angle)
+    #posX = posX + (positionX(vTimeseries, wTimeSeries, aSeries) - prev_posX)
+    #posY = posY + (positionY(vTimeseries, wTimeSeries, aSeries) - prev_posY)
+ 
+    #prev_angle = theta(wTimeSeries)
+    #prev_posX = positionX(vTimeseries, wTimeSeries, aSeries)
+    #prev_posY = positionY(vTimeseries, wTimeSeries, aSeries)
 angle = angle + theta(wTimeSeries)
-posX = posX + positionX(vTimeseries, wTimeSeries)
-posY = posY + positionY(vTimeseries, wTimeSeries)
+posX = posX + positionX(vTimeseries, angleTimeSeries)
+posY = posY + positionY(vTimeseries, angleTimeSeries)
 
-file.write("--------------------------------\n")
-file.write("Theta1(t): " + str(angle) + "\n")
-file.write("PosX1(t): " + str(posX)+"\n")
-file.write("PosY1(t): " + str(posY)+"\n")
+print("--------------------------------\n")
+print("Theta1(t): " + str(angle) + "\n")
+print("PosX1(t): " + str(posX)+"\n")
+print("PosY1(t): " + str(posY)+"\n")
 motorRight.stop()
 motorLeft.stop()
 
