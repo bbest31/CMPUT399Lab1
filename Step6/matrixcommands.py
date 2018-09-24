@@ -16,7 +16,7 @@ wheelDiameter = 5.5/100
 # In meters
 wheelCircumference = 17.3/100
 # In meters
-vehicleWidth = 14.5/100
+vehicleWidth = 10.7/100
 file = open("dead_reckoning_output", "w")
 
 # Motors
